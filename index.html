@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BestCloud</title>
+  <link rel="shortcut icon" href="https://image.flaticon.com/icons/svg/2996/2996304.svg" type="image/x-icon">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+    integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+  <link rel="stylesheet" href="src/css/app.css">
+  <link href="https://fonts.googleapis.com/css2?family=Arimo&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- Image and text -->
+  <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <img src="https://image.flaticon.com/icons/svg/2883/2883249.svg" width="25" height="25"
+          class="d-inline-block align-top" alt="" loading="lazy">
+        BestCloud
+      </a>
+    </div>
+  </nav>
+  <div class="container " id="homePage">
+    <h3>BestCloud 🚀</h3>
+    <small>Find the best cloud provider according to various parameters</small>
+    <div class="row input-group mt-4">
+      <div class="col-sm-12 col-md-6 col-lg-6">
+        <label for="storage">Enter the Storage Amount (GBs)</label>
+        <input class="form-control" type="number" name="storage" id="storage">
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-6">
+        <label for="out">Data Transfer Out (GBs)</label>
+        <input class="form-control" type="number" name="out" id="out">
+      </div>
+    </div>
+    <div class="row input-group mt-4 ">
+      <div class="col-sm-12 col-md-6 col-lg-6">
+        <label for="readreq">Enter the Read Requests</label>
+        <input class="form-control" type="number" name="readreq" id="readreq">
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-6">
+        <label for="writereq">Enter the Write Requests</label>
+        <input class="form-control" type="number" name="writereqt" id="writereq">
+      </div>
+    </div>
+    <div class="row input-group mt-4 ">
+      <div class="col-sm-12 col-md-6 col-lg-6">
+        <label for="region">Region Name</label>
+        <select class="form-control" name="region" id="region">
+          <option value="us">US</option>
+          <option value="eu">EU</option>
+        </select>
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-6">
+        <label for="temp">Temperature</label>
+        <select class="form-control" name="temp" id="temp">
+          <option value="hot">Hot</option>
+          <option value="warm">Warm</option>
+          <option value="cool">Cool</option>
+          <option value="cold">Cold</option>
+        </select>
+      </div>
+    </div>
+    <div class="mt-2 text-center">
+      <button class="btn btn-primary" onclick="show()">Check</button>
+    </div>
+    <!-- Table: Showing Results -->
+    <table class="table table-responsive  mt-5" id="result" style="visibility: hidden;">
+      <thead>
+        <tr>
+          <th scope="col">Provider Name</th>
+          <th scope="col">Product Name</th>
+          <th scope="col">Total Cost (USD)</th>
+          <th scope="col">Details</th>
+
+        </tr>
+      </thead>
+      <tbody class="table-success">
+        <tr>
+          <td id="provider">&nbsp;</td>
+          <td id="product">&nbsp;</td>
+          <td id="cost">&nbsp;</td>
+          <td id="details">&nbsp;</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
+    integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
+    crossorigin="anonymous"></script>
+  <script>
+    const show = () => {
+      let storage = document.getElementById('storage').value;
+      let out = document.getElementById('out').value;
+      let readreq = document.getElementById('readreq').value;
+      let writereq = document.getElementById('writereq').value;
+      let region = document.getElementById('region').value;
+      let temp = document.getElementById('temp').value;
+      if (storage == '' || out == '' || readreq == '' || writereq == '') {
+        alert('Please Enter all values')
+        return;
+      }
+      const URL = `https://br4oeqyt47.execute-api.us-east-1.amazonaws.com/prod/search?storageAmount=${storage}&readRequests=${readreq}&writeRequests=${writereq}&dataTransferOut=${out}&temperature=${temp}&regionName=${region}`
+      fetch(URL)
+        .then(
+          function (response) {
+            if (response.status !== 200) {
+              console.log('Looks like there was a problem. Status Code: ' +
+                response.status);
+              return;
+            }
+
+            // Examine the text in the response
+            response.json().then(function (data) {
+              console.log(data[0]);
+              document.getElementById('result').style.visibility = 'visible';
+              document.getElementById('provider').innerHTML = `${data[0]['providerFullName']} <img src='${data[0]['logo']}' width="30px" height="30px">`;
+              document.getElementById('product').innerHTML = data[0]['productName'];
+              document.getElementById('cost').innerHTML = parseFloat(data[0]['totalCost']).toFixed(2);
+              document.getElementById('details').innerHTML = ` <a href='${data[0]['url']}' target='_blank'>Read Here</a>`;
+
+            });
+          }
+        )
+        .catch(function (err) {
+          console.log('Fetch Error :-S', err);
+        });
+    }
+
+  </script>
+</body>
+
+</html>
